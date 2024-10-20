@@ -3,6 +3,10 @@ import '../models/student_model.dart';
 import '../services/database_service.dart';
 
 class AddStudentScreen extends StatefulWidget {
+  final int gradeGroupId;
+
+  AddStudentScreen({required this.gradeGroupId});
+
   @override
   _AddStudentScreenState createState() => _AddStudentScreenState();
 }
@@ -15,6 +19,7 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
     final student = Student(
       name: _nameController.text,
       matricula: _matriculaController.text,
+      gradeGroupId: widget.gradeGroupId,
     );
     await DatabaseService().addStudent(student);
     Navigator.pop(context);

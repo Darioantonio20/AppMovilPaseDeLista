@@ -2,24 +2,30 @@ class Student {
   final int? id;
   final String name;
   final String matricula;
+  final int gradeGroupId;
 
-  Student({this.id, required this.name, required this.matricula});
+  Student({
+    this.id,
+    required this.name,
+    required this.matricula,
+    required this.gradeGroupId,
+  });
 
-  // Convertir un Student en un mapa para SQLite
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'name': name,
       'matricula': matricula,
+      'gradeGroupId': gradeGroupId,
     };
   }
 
-  // Crear un Student desde un mapa de SQLite
   factory Student.fromMap(Map<String, dynamic> map) {
     return Student(
       id: map['id'],
       name: map['name'],
       matricula: map['matricula'],
+      gradeGroupId: map['gradeGroupId'],
     );
   }
 }
