@@ -42,6 +42,16 @@ class DatabaseService {
     return await db.insert('students', student.toMap());
   }
 
+  // Agregar varios estudiantes a la vez (utilizado al subir el archivo CSV)
+  Future<void> addStudents(List<Student> students) async {
+    final db = await database;
+    Batch batch = db.batch();  // Ejecutamos una inserción en batch (grupo)
+    students.forEach((student) {
+      batch.insert('students', student.toMap());
+    });
+    await batch.commit(noResult: true);
+  }
+
   Future<List<Student>> getStudents() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('students');
