@@ -20,7 +20,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   List<Student> students = [];
   bool isAttendanceLoaded = false;
 
-  final List<String> attendanceStatuses = ['Asistidos', 'Retardo', 'Falta', 'Permiso'];
+  final List<String> attendanceStatuses = ['Presente', 'Retardo', 'Falta', 'Permiso'];
 
   @override
   void initState() {
@@ -33,7 +33,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     setState(() {
       students = data;
       attendance = students.isNotEmpty
-          ? students.map((student) => {student: 'Asistidos'}).toList()
+          ? students.map((student) => {student: 'Presente'}).toList()
           : [];
     });
   }
@@ -94,7 +94,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         setState(() {
           isAttendanceLoaded = true;
           attendance = students.isNotEmpty
-              ? students.map((student) => {student: 'Asistidos'}).toList()
+              ? students.map((student) => {student: 'Presente'}).toList()
               : [];
         });
       }
@@ -187,9 +187,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 Student student = students[index];
                 String status = attendance.isNotEmpty && attendance[index][student] != null
                     ? attendance[index][student]!
-                    : 'Asistidos';
+                    : 'Presente';
                 Color statusColor;
-                if (status == 'Asistidos') {
+                if (status == 'Presente') {
                   statusColor = Colors.green.shade300;
                 } else if (status == 'Retardo') {
                   statusColor = Colors.blue.shade300;
