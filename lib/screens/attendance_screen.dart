@@ -3,7 +3,7 @@ import 'package:pase_de_lista/models/institution_model.dart';
 import '../models/student_model.dart';
 import '../services/database_service.dart';
 import 'package:intl/intl.dart';
-import 'attendance_history_screen.dart';  // Importar la nueva pantalla de historial
+import 'attendance_history_screen.dart';
 
 class AttendanceScreen extends StatefulWidget {
   final GradeGroup gradeGroup;
@@ -30,7 +30,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final data = await DatabaseService().getStudentsByGradeGroup(widget.gradeGroup.id!);
     setState(() {
       students = data;
-      attendance = students.map((student) => {student: 'Asistidos'}).toList();
+      attendance = students.isNotEmpty
+          ? students.map((student) => {student: 'Asistidos'}).toList()
+          : [];
     });
   }
 
@@ -40,6 +42,24 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: ColorScheme.light(
+              primary: const Color.fromARGB(255, 45, 88, 189), 
+              onPrimary: Colors.white, 
+              onSurface: const Color.fromARGB(255, 45, 88, 189),
+            ),
+            dialogBackgroundColor: Colors.white,
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                textStyle: TextStyle(fontSize: 18),
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null && picked != selectedDate) {
       setState(() {
@@ -54,7 +74,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     if (selectedDate != null) {
       String formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate!);
       List<Map<String, dynamic>> data = await DatabaseService().getAttendanceByDate(formattedDate, widget.gradeGroup.id!);
-      
+
       if (data.isNotEmpty) {
         setState(() {
           isAttendanceLoaded = true;
@@ -67,6 +87,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             );
             return {student: entry['status'].toString()};
           }).toList();
+        });
+      } else {
+        setState(() {
+          isAttendanceLoaded = true;
+          attendance = students.isNotEmpty
+              ? students.map((student) => {student: 'Asistidos'}).toList()
+              : [];
         });
       }
     }
@@ -129,7 +156,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AttendanceHistoryScreen(gradeGroup: widget.gradeGroup), // Redirigir a la pantalla de historial
+        builder: (context) => AttendanceHistoryScreen(gradeGroup: widget.gradeGroup),
       ),
     );
   }
@@ -142,7 +169,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         actions: [
           IconButton(
             icon: Icon(Icons.history),
-            onPressed: _navigateToAttendanceHistory, // Agregar botón que lleva a la tabla del historial
+            onPressed: _navigateToAttendanceHistory,
           ),
         ],
       ),
@@ -152,8 +179,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                TextButton(
+                ElevatedButton(
                   onPressed: () => _selectDate(context),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color.fromARGB(255, 45, 88, 189),
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
                   child: Text(
                     selectedDate == null
                         ? 'Seleccionar Fecha'
@@ -167,6 +199,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             child: ListView.builder(
               itemCount: students.length,
               itemBuilder: (context, index) {
+                if (students.isEmpty) {
+                  return Center(child: Text("No hay estudiantes disponibles"));
+                }
                 Student student = students[index];
                 String status = attendance.isNotEmpty && attendance[index][student] != null
                     ? attendance[index][student]!
@@ -179,18 +214,32 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 } else {
                   statusColor = Colors.red.shade300;
                 }
-                return ListTile(
-                  title: Text(student.name),
-                  subtitle: Text('Matrícula: ${student.matricula}'),
-                  trailing: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: statusColor,
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  elevation: 5,
+                  margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.all(16.0),
+                    title: Text(
+                      student.name,
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
-                    onPressed: () {
-                      _showStatusDialog(student, status);
-                    },
-                    child: Text(status),
+                    subtitle: Text(
+                      'Matrícula: ${student.matricula}',
+                      style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                    ),
+                    trailing: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: statusColor,
+                      ),
+                      onPressed: () {
+                        _showStatusDialog(student, status);
+                      },
+                      child: Text(status),
+                    ),
                   ),
                 );
               },
@@ -200,7 +249,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               onPressed: _saveAttendance,
-              child: Text('Guardar Pase de Lista'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 84, 112, 179), 
+                foregroundColor: Colors.white, 
+                textStyle: TextStyle(fontSize: 20),
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: Text('Guardar'),
             ),
           ),
         ],

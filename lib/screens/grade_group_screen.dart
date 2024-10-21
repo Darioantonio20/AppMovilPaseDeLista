@@ -42,9 +42,15 @@ class _GradeGroupScreenState extends State<GradeGroupScreen> {
     _loadGradeGroups();
   }
 
-  void _deleteGradeGroup(int gradeGroupId) async {
-    await DatabaseService().deleteGradeGroup(gradeGroupId);
-    _loadGradeGroups();
+  void _deleteGradeGroupWithAnimation(int gradeGroupId) {
+    setState(() {
+      gradeGroups.removeWhere((gradeGroup) => gradeGroup.id == gradeGroupId);
+    });
+
+    Future.delayed(Duration(milliseconds: 300), () async {
+      await DatabaseService().deleteGradeGroup(gradeGroupId);
+      _loadGradeGroups(); // Recargar la lista
+    });
   }
 
   void _showDeleteConfirmation(GradeGroup gradeGroup) {
@@ -53,19 +59,33 @@ class _GradeGroupScreenState extends State<GradeGroupScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Confirmar eliminación'),
-          content: Text('¿Está seguro de que desea eliminar el grado ${gradeGroup.grade} y grupo ${gradeGroup.group}?'),
+          content: Text('¿Está seguro de que desea eliminar el grupo ${gradeGroup.grade} - ${gradeGroup.group}?'),
           actions: [
             TextButton(
-              child: Text('Cancelar'),
+              child: Text(
+                'Cancelar',
+                style: TextStyle(fontSize: 17),
+              ),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: const Color.fromARGB(255, 84, 112, 179),
+                textStyle: TextStyle(fontWeight: FontWeight.bold),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Eliminar'),
+              child: Text(
+                'Eliminar',
+                style: TextStyle(fontSize: 17),
+              ),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: const Color.fromARGB(255, 177, 19, 19),
+                textStyle: TextStyle(fontWeight: FontWeight.bold),
+              ),
               onPressed: () {
-                _deleteGradeGroup(gradeGroup.id!);
                 Navigator.of(context).pop();
+                _deleteGradeGroupWithAnimation(gradeGroup.id!);
               },
             ),
           ],
@@ -78,10 +98,12 @@ class _GradeGroupScreenState extends State<GradeGroupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Grados y Grupos de ${widget.institution.name}'),
+        title: Text('Grupos de ${widget.institution.name}'),
         actions: [
           IconButton(
             icon: Icon(Icons.add),
+            color: const Color.fromARGB(255, 77, 191, 128),
+            iconSize: 33,
             onPressed: () {
               showDialog(
                 context: context,
@@ -103,12 +125,22 @@ class _GradeGroupScreenState extends State<GradeGroupScreen> {
                     ),
                     actions: [
                       TextButton(
-                        child: Text('Cancelar'),
+                         style: ElevatedButton.styleFrom(
+                          foregroundColor: const Color.fromARGB(255, 177, 19, 19),
+                        ),
+                        child: Text(
+                          'Cancelar',
+                          style: TextStyle(fontSize: 17),
+                         ),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
                       ),
-                      TextButton(
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white, backgroundColor: const Color.fromARGB(255, 84, 112, 179),
+                          textStyle: TextStyle(fontSize: 17),
+                        ),
                         child: Text('Guardar'),
                         onPressed: () {
                           _addGradeGroup();
@@ -126,22 +158,36 @@ class _GradeGroupScreenState extends State<GradeGroupScreen> {
       body: ListView.builder(
         itemCount: gradeGroups.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Text('${gradeGroups[index].grade} - ${gradeGroups[index].group}'),
-            trailing: IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                _showDeleteConfirmation(gradeGroups[index]);
+          GradeGroup gradeGroup = gradeGroups[index];
+          return Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            elevation: 5,
+            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+            child: ListTile(
+              contentPadding: EdgeInsets.all(16.0),
+              title: Text(
+                '${gradeGroup.grade} - ${gradeGroup.group}',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              trailing: IconButton(
+                icon: Icon(Icons.delete),
+                iconSize: 35,
+                color: Colors.red,
+                onPressed: () {
+                  _showDeleteConfirmation(gradeGroup);
+                },
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StudentsScreen(gradeGroup: gradeGroup),
+                  ),
+                );
               },
             ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => StudentsScreen(gradeGroup: gradeGroups[index]),
-                ),
-              );
-            },
           );
         },
       ),

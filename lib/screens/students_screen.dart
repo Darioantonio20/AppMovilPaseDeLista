@@ -192,10 +192,14 @@ class _StudentsScreenState extends State<StudentsScreen> {
         actions: [
           IconButton(
             icon: Icon(Icons.add),
+            color: const Color.fromARGB(255, 77, 191, 128),
+            iconSize: 33,
             onPressed: _addStudentManually,
           ),
           IconButton(
             icon: Icon(Icons.upload_file),
+            color: const Color.fromARGB(255, 76, 202, 133),
+            iconSize: 33,
             onPressed: _pickCsvFile,
           ),
         ],
@@ -206,14 +210,31 @@ class _StudentsScreenState extends State<StudentsScreen> {
             child: ListView.builder(
               itemCount: students.length,
               itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(students[index].name),
-                  subtitle: Text('Matrícula: ${students[index].matricula}'),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () {
-                      _showDeleteConfirmation(students[index]);
-                    },
+                Student student = students[index];
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  elevation: 5,
+                  margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.all(16.0),
+                    title: Text(
+                      student.name,
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    subtitle: Text(
+                      'Matrícula: ${student.matricula}',
+                      style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete),
+                      iconSize: 35,
+                      color: Colors.red,
+                      onPressed: () {
+                        _showDeleteConfirmation(student);
+                      },
+                    ),
                   ),
                 );
               },
@@ -223,6 +244,12 @@ class _StudentsScreenState extends State<StudentsScreen> {
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               onPressed: _navigateToAttendance,
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white, 
+                backgroundColor: const Color.fromARGB(255, 84, 112, 179), 
+                textStyle: TextStyle(fontSize: 20), 
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12), 
+              ),
               child: Text('Pase de Lista'),
             ),
           ),

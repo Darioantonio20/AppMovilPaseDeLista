@@ -50,22 +50,48 @@ class _InstitutionsScreenState extends State<InstitutionsScreen> {
           content: Text('¿Está seguro de que desea eliminar la institución ${institution.name}?'),
           actions: [
             TextButton(
-              child: Text('Cancelar'),
+              child: Text(
+                'Cancelar',
+                style: TextStyle(fontSize: 17),
+              ),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: const Color.fromARGB(255, 84, 112, 179),
+                textStyle: TextStyle(fontWeight: FontWeight.bold),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Eliminar'),
+              child: Text(
+                'Eliminar',
+                style: TextStyle(fontSize: 17),
+                ),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: const Color.fromARGB(255, 177, 19, 19),
+                textStyle: TextStyle(fontWeight: FontWeight.bold),
+              ),
               onPressed: () {
-                _deleteInstitution(institution.id!);
-                Navigator.of(context).pop();
+                Navigator.of(context).pop();  // Cerrar el diálogo antes de la animación
+                _deleteInstitutionWithAnimation(institution.id!);
               },
             ),
           ],
         );
       },
     );
+  }
+
+  void _deleteInstitutionWithAnimation(int institutionId) {
+    // Animación para eliminar una institución
+    setState(() {
+      institutions.removeWhere((institution) => institution.id == institutionId);
+    });
+
+    Future.delayed(Duration(milliseconds: 300), () async {
+      await DatabaseService().deleteInstitution(institutionId);
+      _loadInstitutions(); // Recargar la lista
+    });
   }
 
   @override
@@ -76,6 +102,8 @@ class _InstitutionsScreenState extends State<InstitutionsScreen> {
         actions: [
           IconButton(
             icon: Icon(Icons.add),
+            color: const Color.fromARGB(255, 77, 191, 128),
+            iconSize: 33,
             onPressed: () {
               showDialog(
                 context: context,
@@ -107,12 +135,22 @@ class _InstitutionsScreenState extends State<InstitutionsScreen> {
                     ),
                     actions: [
                       TextButton(
-                        child: Text('Cancelar'),
+                         style: ElevatedButton.styleFrom(
+                          foregroundColor: const Color.fromARGB(255, 177, 19, 19),
+                        ),
+                        child: Text(
+                          'Cancelar',
+                          style: TextStyle(fontSize: 17),
+                         ),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
                       ),
-                      TextButton(
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white, backgroundColor: const Color.fromARGB(255, 84, 112, 179),
+                          textStyle: TextStyle(fontSize: 17),
+                        ),
                         child: Text('Guardar'),
                         onPressed: () {
                           _addInstitution();
@@ -130,23 +168,40 @@ class _InstitutionsScreenState extends State<InstitutionsScreen> {
       body: ListView.builder(
         itemCount: institutions.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(institutions[index].name),
-            subtitle: Text('Turno: ${institutions[index].turno}'),
-            trailing: IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                _showDeleteConfirmation(institutions[index]);
+          Institution institution = institutions[index];
+          return Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            elevation: 5,
+            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+            child: ListTile(
+              contentPadding: EdgeInsets.all(16.0),
+              title: Text(
+                institution.name,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              subtitle: Text(
+                'Turno: ${institution.turno}',
+                style: TextStyle(color: Colors.grey[700], fontSize: 14),
+              ),
+              trailing: IconButton(
+                icon: Icon(Icons.delete),
+                iconSize: 35,
+                color: Colors.red,
+                onPressed: () {
+                  _showDeleteConfirmation(institution);
+                },
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GradeGroupScreen(institution: institution),
+                  ),
+                );
               },
             ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => GradeGroupScreen(institution: institutions[index]),
-                ),
-              );
-            },
           );
         },
       ),
