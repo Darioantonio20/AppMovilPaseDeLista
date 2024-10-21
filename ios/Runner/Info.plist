@@ -2,14 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Esta aplicación necesita acceso a la librería de fotos para cargar archivos CSV.</string>
 	<key>NSDocumentsFolderUsageDescription</key>
 	<string>Esta aplicación necesita acceso a documentos para cargar archivos CSV.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Esta aplicación necesita acceso a tu librería para cargar archivos CSV.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Necesitamos acceso para guardar fotos en la galería.</string>
-	<key>NSDocumentsFolderUsageDescription</key>
-	<string>Necesitamos acceso a los documentos para importar archivos CSV.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Necesitamos acceso a la cámara para tomar fotos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

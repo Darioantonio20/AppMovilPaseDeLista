@@ -9,6 +9,7 @@ android {
     namespace = "com.example.pase_de_lista"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
+    compileSdkVersion 31
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -17,6 +18,7 @@ android {
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = '1.8'
     }
 
     defaultConfig {
@@ -28,6 +30,8 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion 31
     }
 
     buildTypes {

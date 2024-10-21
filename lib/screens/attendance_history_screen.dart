@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:pase_de_lista/models/institution_model.dart';
-import '../models/student_model.dart';
-import '../services/database_service.dart';
 import 'package:intl/intl.dart';
+import 'package:pase_de_lista/models/institution_model.dart';
+import 'package:pase_de_lista/services/database_service.dart';
+import 'package:csv/csv.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:path_provider/path_provider.dart';
+import 'package:file_saver/file_saver.dart';
+import 'dart:io';
 
 class AttendanceHistoryScreen extends StatefulWidget {
   final GradeGroup gradeGroup;
@@ -47,11 +52,94 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     });
   }
 
+  Future<void> _downloadCSV() async {
+    List<List<String>> csvData = [
+      <String>['Nombre', 'Matrícula', 'Fecha', 'Estatus'],
+      ...attendanceHistory.map((record) => [
+            record['name'] ?? 'Sin nombre',
+            record['matricula'] ?? 'Sin matrícula',
+            record['date'] != null ? DateFormat('yyyy-MM-dd').format(DateTime.parse(record['date'])) : 'Sin fecha',
+            record['status'] ?? 'Presente',
+          ])
+    ];
+
+    String csv = const ListToCsvConverter().convert(csvData);
+    final directory = await getApplicationDocumentsDirectory();  // Obteniendo la ruta del sistema
+    final path = '${directory.path}/historial_asistencia.csv';
+    final file = File(path);
+
+    await file.writeAsString(csv);
+    final savedPath = await FileSaver.instance.saveFile(
+      "historial_asistencia",
+      file.readAsBytesSync(),
+      "csv",
+      mimeType: MimeType.CSV,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Archivo CSV guardado en: $savedPath')),
+    );
+  }
+
+  Future<void> _downloadPDF() async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) => pw.Column(
+          children: [
+            pw.Text('Historial de Asistencia'),
+            pw.SizedBox(height: 20),
+            pw.Table.fromTextArray(
+              headers: ['Nombre', 'Matrícula', 'Fecha', 'Estatus'],
+              data: attendanceHistory.map((record) {
+                return [
+                  record['name'] ?? 'Sin nombre',
+                  record['matricula'] ?? 'Sin matrícula',
+                  record['date'] != null ? DateFormat('yyyy-MM-dd').format(DateTime.parse(record['date'])) : 'Sin fecha',
+                  record['status'] ?? 'Presente'
+                ];
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/historial_asistencia.pdf';
+    final file = File(path);
+    await file.writeAsBytes(await pdf.save());
+
+    final savedPath = await FileSaver.instance.saveFile(
+      "historial_asistencia",
+      file.readAsBytesSync(),
+      "pdf",
+      mimeType: MimeType.PDF,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Archivo PDF guardado en: $savedPath')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Historial de Asistencia - ${widget.gradeGroup.grade} - ${widget.gradeGroup.group}'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.download),
+            onPressed: _downloadCSV,
+            tooltip: 'Descargar CSV',
+          ),
+          IconButton(
+            icon: Icon(Icons.picture_as_pdf),
+            onPressed: _downloadPDF,
+            tooltip: 'Descargar PDF',
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

@@ -1,0 +1,89 @@
+import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:flutter/services.dart' show rootBundle;
+import 'dart:typed_data';
+import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:file_saver/file_saver.dart';
+
+class PDFExporter {
+  Future<pw.Font> _loadRobotoFont() async {
+    final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
+    return pw.Font.ttf(fontData);
+  }
+
+  Future<void> _requestPermissions() async {
+    if (await Permission.storage.request().isGranted) {
+      // Permiso concedido
+    } else {
+      // Manejar el caso cuando el permiso es denegado
+      print("Permiso de almacenamiento denegado");
+    }
+  }
+
+  Future<void> _generatePDF() async {
+    await _requestPermissions();
+
+    final pdf = pw.Document();
+    final robotoFont = await _loadRobotoFont(); // Cargar la fuente Roboto
+
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Center(
+            child: pw.Text(
+              'Historial de Asistencia',
+              style: pw.TextStyle(font: robotoFont), // Usar la fuente Roboto
+            ),
+          );
+        },
+      ),
+    );
+
+    // Guardar el PDF en el dispositivo
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/historial_asistencia.pdf';
+    final file = File(path);
+
+    await file.writeAsBytes(await pdf.save());
+
+    // Guardar el archivo utilizando FileSaver para elegir la ruta del dispositivo
+    await FileSaver.instance.saveFile(
+      "historial_asistencia",
+      await file.readAsBytes(),
+      "pdf",
+      mimeType: MimeType.PDF,
+    );
+
+    print("Archivo PDF guardado en: $path");
+  }
+}
+
+class PDFExportButton extends StatelessWidget {
+  final PDFExporter pdfExporter = PDFExporter();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Exportar PDF"),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.picture_as_pdf),
+            onPressed: () async {
+              await pdfExporter._generatePDF();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Archivo PDF generado')),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Center(
+        child: Text("Generar PDF de Historial de Asistencia"),
+      ),
+    );
+  }
+}
