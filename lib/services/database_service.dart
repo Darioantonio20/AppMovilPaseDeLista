@@ -173,3 +173,9 @@ class DatabaseService {
     ''', [gradeGroupId]);
   }
 }
+
+// poner agregar grado y grupo enmodal -> en grado _> nombre de materia y en grupo poner string grado - grupo
+
+// pase de lista cambiar estado a asistencia - estado de permido
+// alternativa de cambiar boton de manera dinamica para cambiar estado
+// exportar la tabla donde esta la fecha y estatus de los alumnos en un csv o pdf

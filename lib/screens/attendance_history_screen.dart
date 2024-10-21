@@ -15,7 +15,7 @@ class AttendanceHistoryScreen extends StatefulWidget {
 
 class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
   List<Map<String, dynamic>> attendanceHistory = [];
-  Map<int, Map<String, int>> attendanceSummary = {}; // Almacena el resumen de asistencias por estudiante
+  Map<int, Map<String, int>> attendanceSummary = {};
 
   @override
   void initState() {
@@ -28,16 +28,17 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
 
     Map<int, Map<String, int>> summary = {};
 
-    // Crear el resumen de asistencias para cada alumno
     for (var record in data) {
-      int studentId = record['studentId'];
-      String status = record['status'];
+      int? studentId = record['studentId'] as int?;
+      String status = record['status'] ?? 'Presente';
+
+      if (studentId == null) continue;
 
       if (!summary.containsKey(studentId)) {
-        summary[studentId] = {'Asistidos': 0, 'Retardo': 0, 'Falta': 0};
+        summary[studentId] = {'Presente': 0, 'Retardo': 0, 'Falta': 0, 'Permiso': 0};
       }
 
-      summary[studentId]![status] = summary[studentId]![status]! + 1;
+      summary[studentId]![status] = (summary[studentId]![status] ?? 0) + 1;
     }
 
     setState(() {
@@ -59,12 +60,14 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
             : SingleChildScrollView(
                 child: Column(
                   children: attendanceSummary.keys.map((studentId) {
-                    // Filtrar registros de asistencia para este estudiante
                     List<Map<String, dynamic>> studentRecords = attendanceHistory
                         .where((record) => record['studentId'] == studentId)
                         .toList();
-                    String studentName = studentRecords[0]['name'];
-                    String studentMatricula = studentRecords[0]['matricula'];
+
+                    if (studentRecords.isEmpty) return SizedBox.shrink();
+
+                    String studentName = studentRecords[0]['name'] ?? 'Sin nombre';
+                    String studentMatricula = studentRecords[0]['matricula'] ?? 'Sin matrícula';
 
                     return Card(
                       elevation: 5,
@@ -89,13 +92,17 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                             const SizedBox(height: 10),
                             Column(
                               children: studentRecords.map((record) {
-                                String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.parse(record['date']));
-                                String status = record['status'];
+                                String formattedDate = record['date'] != null
+                                    ? DateFormat('yyyy-MM-dd').format(DateTime.parse(record['date']))
+                                    : 'Sin fecha';
+                                String status = record['status'] ?? 'Presente';
                                 Color statusColor;
-                                if (status == 'Asistidos') {
+                                if (status == 'Presente') {
                                   statusColor = Colors.green;
                                 } else if (status == 'Retardo') {
                                   statusColor = Colors.blue;
+                                } else if (status == 'Permiso') {
+                                  statusColor = Colors.purple;
                                 } else {
                                   statusColor = Colors.red;
                                 }
@@ -124,12 +131,16 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Asistencias: ${attendanceSummary[studentId]!['Asistidos']}',
+                                  'Asistencias: ${attendanceSummary[studentId]!['Presente']}',
                                   style: TextStyle(color: Colors.green),
                                 ),
                                 Text(
                                   'Retardos: ${attendanceSummary[studentId]!['Retardo']}',
                                   style: TextStyle(color: Colors.blue),
+                                ),
+                                Text(
+                                  'Permisos: ${attendanceSummary[studentId]!['Permiso']}',
+                                  style: TextStyle(color: Colors.purple),
                                 ),
                                 Text(
                                   'Faltas: ${attendanceSummary[studentId]!['Falta']}',

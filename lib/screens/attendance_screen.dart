@@ -20,6 +20,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   List<Student> students = [];
   bool isAttendanceLoaded = false;
 
+  final List<String> attendanceStatuses = ['Asistidos', 'Retardo', 'Falta', 'Permiso'];
+
   @override
   void initState() {
     super.initState();
@@ -46,8 +48,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         return Theme(
           data: ThemeData.light().copyWith(
             colorScheme: ColorScheme.light(
-              primary: const Color.fromARGB(255, 45, 88, 189), 
-              onPrimary: Colors.white, 
+              primary: const Color.fromARGB(255, 45, 88, 189),
+              onPrimary: Colors.white,
               onSurface: const Color.fromARGB(255, 45, 88, 189),
             ),
             dialogBackgroundColor: Colors.white,
@@ -118,38 +120,18 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     }
   }
 
-  void _setAttendanceStatus(Student student, String status) {
+  void _toggleAttendanceStatus(Student student) {
     setState(() {
       attendance = attendance.map((entry) {
         if (entry.keys.first == student) {
-          return {student: status};
+          String currentStatus = entry.values.first;
+          int currentIndex = attendanceStatuses.indexOf(currentStatus);
+          String nextStatus = attendanceStatuses[(currentIndex + 1) % attendanceStatuses.length];
+          return {student: nextStatus};
         }
         return entry;
       }).toList();
     });
-  }
-
-  void _showStatusDialog(Student student, String currentStatus) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Seleccionar Estado'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: ['Asistidos', 'Retardo', 'Falta'].map((String value) {
-              return ListTile(
-                title: Text(value),
-                onTap: () {
-                  _setAttendanceStatus(student, value);
-                  Navigator.of(context).pop();
-                },
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
   }
 
   void _navigateToAttendanceHistory() {
@@ -211,6 +193,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   statusColor = Colors.green.shade300;
                 } else if (status == 'Retardo') {
                   statusColor = Colors.blue.shade300;
+                } else if (status == 'Permiso') {
+                  statusColor = Colors.purple.shade300;
                 } else {
                   statusColor = Colors.red.shade300;
                 }
@@ -236,7 +220,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         backgroundColor: statusColor,
                       ),
                       onPressed: () {
-                        _showStatusDialog(student, status);
+                        _toggleAttendanceStatus(student);
                       },
                       child: Text(status),
                     ),
@@ -250,8 +234,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             child: ElevatedButton(
               onPressed: _saveAttendance,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 84, 112, 179), 
-                foregroundColor: Colors.white, 
+                backgroundColor: const Color.fromARGB(255, 84, 112, 179),
+                foregroundColor: Colors.white,
                 textStyle: TextStyle(fontSize: 20),
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
