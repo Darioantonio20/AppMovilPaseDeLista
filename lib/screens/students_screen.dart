@@ -4,6 +4,7 @@ import '../models/student_model.dart';
 import '../models/institution_model.dart';
 import '../services/database_service.dart';
 import 'add_student_screen.dart';
+import 'attendance_screen.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
 import 'package:csv/csv.dart';
@@ -174,6 +175,15 @@ class _StudentsScreenState extends State<StudentsScreen> {
     });
   }
 
+  void _navigateToAttendance() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AttendanceScreen(gradeGroup: widget.gradeGroup),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -190,20 +200,33 @@ class _StudentsScreenState extends State<StudentsScreen> {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: students.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(students[index].name),
-            subtitle: Text('Matrícula: ${students[index].matricula}'),
-            trailing: IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                _showDeleteConfirmation(students[index]);
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: students.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(students[index].name),
+                  subtitle: Text('Matrícula: ${students[index].matricula}'),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () {
+                      _showDeleteConfirmation(students[index]);
+                    },
+                  ),
+                );
               },
             ),
-          );
-        },
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: _navigateToAttendance,
+              child: Text('Pase de Lista'),
+            ),
+          ),
+        ],
       ),
     );
   }

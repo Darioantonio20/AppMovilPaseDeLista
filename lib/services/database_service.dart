@@ -1,8 +1,7 @@
+import 'package:pase_de_lista/models/institution_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../models/institution_model.dart';
 import '../models/student_model.dart';
-import '../models/institution_model.dart';
 
 class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
@@ -24,8 +23,9 @@ class DatabaseService {
     String path = join(await getDatabasesPath(), 'school.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 3,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -57,6 +57,36 @@ class DatabaseService {
         FOREIGN KEY(gradeGroupId) REFERENCES grade_groups(id)
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE attendance(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        studentId INTEGER,
+        date TEXT,
+        status TEXT,
+        FOREIGN KEY(studentId) REFERENCES students(id)
+      )
+    ''');
+  }
+
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 3) {
+      var tableCheck = await db.rawQuery('''
+        SELECT name FROM sqlite_master WHERE type='table' AND name='attendance';
+      ''');
+
+      if (tableCheck.isEmpty) {
+        await db.execute('''
+          CREATE TABLE attendance(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            studentId INTEGER,
+            date TEXT,
+            status TEXT,
+            FOREIGN KEY(studentId) REFERENCES students(id)
+          )
+        ''');
+      }
+    }
   }
 
   Future<int> addInstitution(Institution institution) async {
@@ -111,5 +141,35 @@ class DatabaseService {
   Future<void> deleteStudent(int studentId) async {
     final db = await database;
     await db.delete('students', where: 'id = ?', whereArgs: [studentId]);
+  }
+
+  Future<int> addAttendance(int studentId, String date, String status) async {
+    final db = await database;
+    return await db.insert('attendance', {
+      'studentId': studentId,
+      'date': date,
+      'status': status,
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getAttendanceByDate(String date, int gradeGroupId) async {
+    final db = await database;
+    return await db.rawQuery('''
+      SELECT students.id, students.name, students.matricula, attendance.status
+      FROM attendance
+      JOIN students ON attendance.studentId = students.id
+      WHERE attendance.date = ? AND students.gradeGroupId = ?
+    ''', [date, gradeGroupId]);
+  }
+
+  Future<List<Map<String, dynamic>>> getAttendanceByGradeGroup(int gradeGroupId) async {
+    final db = await database;
+    return await db.rawQuery('''
+      SELECT students.id AS studentId, students.name, students.matricula, attendance.date, attendance.status
+      FROM attendance
+      JOIN students ON attendance.studentId = students.id
+      WHERE students.gradeGroupId = ?
+      ORDER BY attendance.date DESC
+    ''', [gradeGroupId]);
   }
 }
