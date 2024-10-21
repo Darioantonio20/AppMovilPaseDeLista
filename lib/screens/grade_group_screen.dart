@@ -16,6 +16,7 @@ class _GradeGroupScreenState extends State<GradeGroupScreen> {
   List<GradeGroup> gradeGroups = [];
   final TextEditingController _gradeController = TextEditingController();
   final TextEditingController _groupController = TextEditingController();
+  final TextEditingController _subjectController = TextEditingController(); // Nuevo campo para materia
 
   @override
   void initState() {
@@ -34,11 +35,13 @@ class _GradeGroupScreenState extends State<GradeGroupScreen> {
     final gradeGroup = GradeGroup(
       grade: _gradeController.text,
       group: _groupController.text,
+      subject: _subjectController.text, // Materia añadida
       institutionId: widget.institution.id!,
     );
     await DatabaseService().addGradeGroup(gradeGroup);
     _gradeController.clear();
     _groupController.clear();
+    _subjectController.clear(); // Limpiar después de guardar
     _loadGradeGroups();
   }
 
@@ -49,7 +52,7 @@ class _GradeGroupScreenState extends State<GradeGroupScreen> {
 
     Future.delayed(Duration(milliseconds: 300), () async {
       await DatabaseService().deleteGradeGroup(gradeGroupId);
-      _loadGradeGroups(); // Recargar la lista
+      _loadGradeGroups();
     });
   }
 
@@ -109,7 +112,7 @@ class _GradeGroupScreenState extends State<GradeGroupScreen> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: Text('Agregar Grado y Grupo'),
+                    title: Text('Agregar Grado, Grupo y Materia'),
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -120,6 +123,10 @@ class _GradeGroupScreenState extends State<GradeGroupScreen> {
                         TextField(
                           controller: _groupController,
                           decoration: InputDecoration(labelText: 'Grupo'),
+                        ),
+                        TextField(
+                          controller: _subjectController,
+                          decoration: InputDecoration(labelText: 'Materia'), // Nuevo campo para materia
                         ),
                       ],
                     ),
@@ -168,7 +175,7 @@ class _GradeGroupScreenState extends State<GradeGroupScreen> {
             child: ListTile(
               contentPadding: EdgeInsets.all(16.0),
               title: Text(
-                '${gradeGroup.grade} - ${gradeGroup.group}',
+                '${gradeGroup.grade} - ${gradeGroup.group} - ${gradeGroup.subject}', // Mostrar materia
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
               trailing: IconButton(

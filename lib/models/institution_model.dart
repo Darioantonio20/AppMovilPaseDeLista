@@ -26,15 +26,17 @@ class GradeGroup {
   final int? id;
   final String grade;
   final String group;
-  final int institutionId; // Relación con la institución
+  final String subject; // Nueva propiedad para materia
+  final int institutionId;
 
-  GradeGroup({this.id, required this.grade, required this.group, required this.institutionId});
+  GradeGroup({this.id, required this.grade, required this.group, required this.subject, required this.institutionId});
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'grade': grade,
       'group': group,
+      'subject': subject, // Agregar materia en el mapeo
       'institutionId': institutionId,
     };
   }
@@ -44,6 +46,7 @@ class GradeGroup {
       id: map['id'],
       grade: map['grade'],
       group: map['group'],
+      subject: map['subject'], // Obtener materia del mapa
       institutionId: map['institutionId'],
     );
   }

@@ -150,7 +150,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         title: Text('Pase de Lista - ${widget.gradeGroup.grade} - ${widget.gradeGroup.group}'),
         actions: [
           IconButton(
-            icon: Icon(Icons.history),
+            icon: Icon(Icons.calendar_month_outlined),
+            iconSize: 35,
+            color: const Color.fromARGB(255, 45, 88, 189),
             onPressed: _navigateToAttendanceHistory,
           ),
         ],

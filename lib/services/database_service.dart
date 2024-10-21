@@ -1,7 +1,7 @@
-import 'package:pase_de_lista/models/institution_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/student_model.dart';
+import '../models/institution_model.dart';
 
 class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
@@ -23,7 +23,7 @@ class DatabaseService {
     String path = join(await getDatabasesPath(), 'school.db');
     return await openDatabase(
       path,
-      version: 3,
+      version: 4, // Incrementar versión
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -43,6 +43,7 @@ class DatabaseService {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         grade TEXT,
         "group" TEXT,
+        subject TEXT, // Agregar el campo de materia
         institutionId INTEGER,
         FOREIGN KEY(institutionId) REFERENCES institutions(id)
       )
@@ -70,22 +71,10 @@ class DatabaseService {
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 3) {
-      var tableCheck = await db.rawQuery('''
-        SELECT name FROM sqlite_master WHERE type='table' AND name='attendance';
+    if (oldVersion < 4) {
+      await db.execute('''
+        ALTER TABLE grade_groups ADD COLUMN subject TEXT;
       ''');
-
-      if (tableCheck.isEmpty) {
-        await db.execute('''
-          CREATE TABLE attendance(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            studentId INTEGER,
-            date TEXT,
-            status TEXT,
-            FOREIGN KEY(studentId) REFERENCES students(id)
-          )
-        ''');
-      }
     }
   }
 
