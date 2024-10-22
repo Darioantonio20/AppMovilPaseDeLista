@@ -43,7 +43,7 @@ class DatabaseService {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         grade TEXT,
         "group" TEXT,
-        subject TEXT, // Agregar el campo de materia
+        subject TEXT, -- Agregar el campo de materia
         institutionId INTEGER,
         FOREIGN KEY(institutionId) REFERENCES institutions(id)
       )
