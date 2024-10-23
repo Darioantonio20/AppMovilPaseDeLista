@@ -20,7 +20,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   List<Student> students = [];
   bool isAttendanceLoaded = false;
 
-  final List<String> attendanceStatuses = ['Presente', 'Retardo', 'Falta', 'Permiso'];
+  final List<String> attendanceStatuses = ['Presente', 'Falta', 'Permiso', 'Retardo',];
 
   @override
   void initState() {
@@ -193,12 +193,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 Color statusColor;
                 if (status == 'Presente') {
                   statusColor = Colors.green.shade300;
-                } else if (status == 'Retardo') {
-                  statusColor = Colors.blue.shade300;
+                } else if (status == 'Falta') {
+                  statusColor = Colors.red.shade300;
                 } else if (status == 'Permiso') {
                   statusColor = Colors.purple.shade300;
                 } else {
-                  statusColor = Colors.red.shade300;
+                  statusColor = Colors.blue.shade300;
                 }
                 return Card(
                   shape: RoundedRectangleBorder(
