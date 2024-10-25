@@ -10,7 +10,8 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:cross_file/cross_file.dart'; // Importar XFile
+import 'package:cross_file/cross_file.dart';
+import 'package:collection/collection.dart';
 
 class AttendanceHistoryScreen extends StatefulWidget {
   final GradeGroup gradeGroup;
@@ -56,19 +57,39 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     });
   }
 
-  // Método para compartir el CSV
   Future<void> _shareCSV() async {
-    List<List<String>> csvData = [
-      <String>['Nombre', 'Matrícula', 'Fecha', 'Estatus'],
-      ...attendanceHistory.map((record) => [
-            record['name'] ?? 'Sin nombre',
-            record['matricula'] ?? 'Sin matrícula',
-            record['date'] != null
-                ? DateFormat('yyyy-MM-dd').format(DateTime.parse(record['date']))
-                : 'Sin fecha',
-            record['status'] ?? 'Presente',
-          ])
-    ];
+    Set<String> dateSet = attendanceHistory
+        .map((record) => record['date'] != null ? record['date'] as String : '')
+        .toSet();
+    List<String> dates = dateSet.toList()..sort();
+
+    List<List<String>> csvData = [];
+
+    List<String> header = ['Nombre', 'Matrícula'] + dates + ['Presente', 'Falta', 'Permiso', 'Retardo'];
+    csvData.add(header);
+
+    var groupedData = groupBy(attendanceHistory, (record) => record['studentId']);
+
+    groupedData.forEach((studentId, records) {
+      String name = records.first['name'] ?? 'Sin nombre';
+      String matricula = records.first['matricula'] ?? 'Sin matrícula';
+      Map<String, String> dateStatusMap = {};
+      for (var record in records) {
+        String date = record['date'] != null ? record['date'] as String : '';
+        String status = record['status'] ?? 'Presente';
+        dateStatusMap[date] = status;
+      }
+      List<String> row = [name, matricula];
+      for (var date in dates) {
+        row.add(dateStatusMap[date] ?? '');
+      }
+      int presentes = attendanceSummary[studentId]!['Presente'] ?? 0;
+      int faltas = attendanceSummary[studentId]!['Falta'] ?? 0;
+      int permisos = attendanceSummary[studentId]!['Permiso'] ?? 0;
+      int retardos = attendanceSummary[studentId]!['Retardo'] ?? 0;
+      row.addAll([presentes.toString(), faltas.toString(), permisos.toString(), retardos.toString()]);
+      csvData.add(row);
+    });
 
     String csv = const ListToCsvConverter().convert(csvData);
 
@@ -83,11 +104,43 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     await Share.shareXFiles([xfile], text: 'Historial de Asistencia');
   }
 
-  // Método para compartir el PDF
   Future<void> _sharePDF() async {
+    Set<String> dateSet = attendanceHistory
+        .map((record) => record['date'] != null ? record['date'] as String : '')
+        .toSet();
+    List<String> dates = dateSet.toList()..sort();
+
     final pdf = pw.Document();
     final fontData = await rootBundle.load('assets/fonts/Roboto-Bold.ttf');
     final ttf = pw.Font.ttf(fontData);
+
+    List<List<String>> tableData = [];
+
+    List<String> header = ['Nombre', 'Matrícula'] + dates + ['Presente', 'Falta', 'Permiso', 'Retardo'];
+    tableData.add(header);
+
+    var groupedData = groupBy(attendanceHistory, (record) => record['studentId']);
+
+    groupedData.forEach((studentId, records) {
+      String name = records.first['name'] ?? 'Sin nombre';
+      String matricula = records.first['matricula'] ?? 'Sin matrícula';
+      Map<String, String> dateStatusMap = {};
+      for (var record in records) {
+        String date = record['date'] != null ? record['date'] as String : '';
+        String status = record['status'] ?? 'Presente';
+        dateStatusMap[date] = status;
+      }
+      List<String> row = [name, matricula];
+      for (var date in dates) {
+        row.add(dateStatusMap[date] ?? '');
+      }
+      int presentes = attendanceSummary[studentId]!['Presente'] ?? 0;
+      int faltas = attendanceSummary[studentId]!['Falta'] ?? 0;
+      int permisos = attendanceSummary[studentId]!['Permiso'] ?? 0;
+      int retardos = attendanceSummary[studentId]!['Retardo'] ?? 0;
+      row.addAll([presentes.toString(), faltas.toString(), permisos.toString(), retardos.toString()]);
+      tableData.add(row);
+    });
 
     pdf.addPage(
       pw.Page(
@@ -96,19 +149,10 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
             pw.Text('Historial de Asistencia', style: pw.TextStyle(font: ttf)),
             pw.SizedBox(height: 20),
             pw.Table.fromTextArray(
-              headers: ['Nombre', 'Matrícula', 'Fecha', 'Estatus'],
-              data: attendanceHistory.map((record) {
-                return [
-                  record['name'] ?? 'Sin nombre',
-                  record['matricula'] ?? 'Sin matrícula',
-                  record['date'] != null
-                      ? DateFormat('yyyy-MM-dd').format(DateTime.parse(record['date']))
-                      : 'Sin fecha',
-                  record['status'] ?? 'Presente'
-                ];
-              }).toList(),
-              cellStyle: pw.TextStyle(font: ttf),
-              headerStyle: pw.TextStyle(font: ttf, fontWeight: pw.FontWeight.bold),
+              headers: header,
+              data: tableData.skip(1).toList(),
+              cellStyle: pw.TextStyle(font: ttf, fontSize: 8),
+              headerStyle: pw.TextStyle(font: ttf, fontWeight: pw.FontWeight.bold, fontSize: 8),
             ),
           ],
         ),
@@ -128,7 +172,6 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // No AppBar, según tu solicitud
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -136,13 +179,11 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
               ? Center(child: Text('No hay registros de asistencia disponibles'))
               : Column(
                   children: [
-                    // Botones con margen superior
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          // Solo los botones de compartir
                           IconButton(
                             icon: Icon(Icons.insert_drive_file),
                             onPressed: _shareCSV,
