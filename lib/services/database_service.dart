@@ -23,7 +23,7 @@ class DatabaseService {
     String path = join(await getDatabasesPath(), 'school.db');
     return await openDatabase(
       path,
-      version: 4, // Incrementar versión
+      version: 5,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -43,7 +43,7 @@ class DatabaseService {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         grade TEXT,
         "group" TEXT,
-        subject TEXT, -- Agregar el campo de materia
+        subject TEXT,
         institutionId INTEGER,
         FOREIGN KEY(institutionId) REFERENCES institutions(id)
       )
@@ -65,7 +65,8 @@ class DatabaseService {
         studentId INTEGER,
         date TEXT,
         status TEXT,
-        FOREIGN KEY(studentId) REFERENCES students(id)
+        FOREIGN KEY(studentId) REFERENCES students(id),
+        UNIQUE(studentId, date)
       )
     ''');
   }
@@ -74,6 +75,20 @@ class DatabaseService {
     if (oldVersion < 4) {
       await db.execute('''
         ALTER TABLE grade_groups ADD COLUMN subject TEXT;
+      ''');
+    }
+    if (oldVersion < 5) {
+      await db.execute('''
+        DELETE FROM attendance
+        WHERE id NOT IN (
+          SELECT MIN(id)
+          FROM attendance
+          GROUP BY studentId, date
+        );
+      ''');
+
+      await db.execute('''
+        CREATE UNIQUE INDEX idx_attendance_student_date ON attendance(studentId, date);
       ''');
     }
   }
@@ -132,13 +147,17 @@ class DatabaseService {
     await db.delete('students', where: 'id = ?', whereArgs: [studentId]);
   }
 
-  Future<int> addAttendance(int studentId, String date, String status) async {
+  Future<void> addOrUpdateAttendance(int studentId, String date, String status) async {
     final db = await database;
-    return await db.insert('attendance', {
-      'studentId': studentId,
-      'date': date,
-      'status': status,
-    });
+    await db.insert(
+      'attendance',
+      {
+        'studentId': studentId,
+        'date': date,
+        'status': status,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<List<Map<String, dynamic>>> getAttendanceByDate(String date, int gradeGroupId) async {
@@ -162,9 +181,3 @@ class DatabaseService {
     ''', [gradeGroupId]);
   }
 }
-
-// poner agregar grado y grupo enmodal -> en grado _> nombre de materia y en grupo poner string grado - grupo
-
-// pase de lista cambiar estado a asistencia - estado de permido
-// alternativa de cambiar boton de manera dinamica para cambiar estado
-// exportar la tabla donde esta la fecha y estatus de los alumnos en un csv o pdf

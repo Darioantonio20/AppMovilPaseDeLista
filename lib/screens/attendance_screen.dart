@@ -20,7 +20,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   List<Student> students = [];
   bool isAttendanceLoaded = false;
 
-  final List<String> attendanceStatuses = ['Presente', 'Falta', 'Permiso', 'Retardo',];
+  final List<String> attendanceStatuses = ['Presente', 'Falta', 'Permiso', 'Retardo'];
 
   @override
   void initState() {
@@ -41,7 +41,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: selectedDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
       builder: (BuildContext context, Widget? child) {
@@ -63,7 +63,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         );
       },
     );
-    if (picked != null && picked != selectedDate) {
+    if (picked != null) {
       setState(() {
         selectedDate = picked;
         isAttendanceLoaded = false;
@@ -108,7 +108,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         Student student = entry.keys.first;
         String status = entry.values.first;
 
-        await DatabaseService().addAttendance(student.id!, formattedDate, status);
+        await DatabaseService().addOrUpdateAttendance(student.id!, formattedDate, status);
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Pase de lista guardado')),
@@ -123,7 +123,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   void _toggleAttendanceStatus(Student student) {
     setState(() {
       attendance = attendance.map((entry) {
-        if (entry.keys.first == student) {
+        if (entry.keys.first.id == student.id) {
           String currentStatus = entry.values.first;
           int currentIndex = attendanceStatuses.indexOf(currentStatus);
           String nextStatus = attendanceStatuses[(currentIndex + 1) % attendanceStatuses.length];
@@ -180,61 +180,67 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: students.length,
-              itemBuilder: (context, index) {
-                if (students.isEmpty) {
-                  return Center(child: Text("No hay estudiantes disponibles"));
-                }
-                Student student = students[index];
-                String status = attendance.isNotEmpty && attendance[index][student] != null
-                    ? attendance[index][student]!
-                    : 'Presente';
-                Color statusColor;
-                if (status == 'Presente') {
-                  statusColor = Colors.green.shade300;
-                } else if (status == 'Falta') {
-                  statusColor = Colors.red.shade300;
-                } else if (status == 'Permiso') {
-                  statusColor = Colors.purple.shade300;
-                } else {
-                  statusColor = Colors.blue.shade300;
-                }
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.0),
-                  ),
-                  elevation: 5,
-                  margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                  child: ListTile(
-                    contentPadding: EdgeInsets.all(16.0),
-                    title: Text(
-                      student.name,
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                    ),
-                    subtitle: Text(
-                      'Matrícula: ${student.matricula}',
-                      style: TextStyle(color: Colors.grey[700], fontSize: 14),
-                    ),
-                    trailing: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: statusColor,
-                      ),
-                      onPressed: () {
-                        _toggleAttendanceStatus(student);
-                      },
-                      child: Text(status),
-                    ),
-                  ),
-                );
-              },
-            ),
+            child: isAttendanceLoaded
+                ? ListView.builder(
+                    itemCount: students.length,
+                    itemBuilder: (context, index) {
+                      if (students.isEmpty) {
+                        return Center(child: Text("No hay estudiantes disponibles"));
+                      }
+                      Student student = students[index];
+                      String status = 'Presente';
+                      for (var entry in attendance) {
+                        if (entry.keys.first.id == student.id) {
+                          status = entry.values.first;
+                          break;
+                        }
+                      }
+                      Color statusColor;
+                      if (status == 'Presente') {
+                        statusColor = Colors.green.shade300;
+                      } else if (status == 'Falta') {
+                        statusColor = Colors.red.shade300;
+                      } else if (status == 'Permiso') {
+                        statusColor = Colors.purple.shade300;
+                      } else {
+                        statusColor = Colors.blue.shade300;
+                      }
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        elevation: 5,
+                        margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.all(16.0),
+                          title: Text(
+                            student.name,
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
+                          subtitle: Text(
+                            'Matrícula: ${student.matricula}',
+                            style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                          ),
+                          trailing: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: statusColor,
+                            ),
+                            onPressed: () {
+                              _toggleAttendanceStatus(student);
+                            },
+                            child: Text(status),
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : Center(child: Text('Por favor, seleccione una fecha para cargar la asistencia')),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
-              onPressed: _saveAttendance,
+              onPressed: isAttendanceLoaded ? _saveAttendance : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 84, 112, 179),
                 foregroundColor: Colors.white,
