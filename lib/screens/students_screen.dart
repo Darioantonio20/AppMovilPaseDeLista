@@ -157,13 +157,21 @@ class _StudentsScreenState extends State<StudentsScreen> {
           content: Text('¿Está seguro de que desea eliminar al estudiante ${student.name}?'),
           actions: [
             TextButton(
-              child: Text('Cancelar'),
+              child: Text('Cancelar',
+                style: TextStyle(fontSize: 20,
+                color: const Color.fromARGB(255, 84, 112, 179),
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Eliminar'),
+              child: Text('Eliminar',
+               style: TextStyle(fontSize: 20,
+               color: const Color.fromARGB(255, 177, 19, 19),
+               ),               
+              ),
               onPressed: () {
                 _deleteStudent(student.id!);
                 Navigator.of(context).pop();
