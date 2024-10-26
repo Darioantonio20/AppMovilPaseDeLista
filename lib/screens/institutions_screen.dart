@@ -66,7 +66,7 @@ class _InstitutionsScreenState extends State<InstitutionsScreen> {
               child: Text(
                 'Eliminar',
                 style: TextStyle(fontSize: 17),
-                ),
+              ),
               style: ElevatedButton.styleFrom(
                 foregroundColor: const Color.fromARGB(255, 177, 19, 19),
                 textStyle: TextStyle(fontWeight: FontWeight.bold),
@@ -83,14 +83,13 @@ class _InstitutionsScreenState extends State<InstitutionsScreen> {
   }
 
   void _deleteInstitutionWithAnimation(int institutionId) {
-    // Animación para eliminar una institución
     setState(() {
       institutions.removeWhere((institution) => institution.id == institutionId);
     });
 
     Future.delayed(Duration(milliseconds: 300), () async {
       await DatabaseService().deleteInstitution(institutionId);
-      _loadInstitutions(); // Recargar la lista
+      _loadInstitutions();
     });
   }
 
@@ -142,13 +141,13 @@ class _InstitutionsScreenState extends State<InstitutionsScreen> {
                     ),
                     actions: [
                       TextButton(
-                         style: ElevatedButton.styleFrom(
+                        style: ElevatedButton.styleFrom(
                           foregroundColor: const Color.fromARGB(255, 177, 19, 19),
                         ),
                         child: Text(
                           'Cancelar',
                           style: TextStyle(fontSize: 17),
-                         ),
+                        ),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
@@ -172,63 +171,76 @@ class _InstitutionsScreenState extends State<InstitutionsScreen> {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: institutions.length,
-        itemBuilder: (context, index) {
-          Institution institution = institutions[index];
-          return Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15.0),
-            ),
-            elevation: 5,
-            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-            child: ListTile(
-             leading: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: Offset(0, 3), // changes position of shadow
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: institutions.length,
+              itemBuilder: (context, index) {
+                Institution institution = institutions[index];
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
                   ),
-                ],
-              ),
-              child: CircleAvatar(
-                child: Icon(Icons.school_sharp,
-                  color: const Color.fromARGB(255, 84, 112, 179), size: 30),
-                backgroundColor: const Color.fromARGB(255, 237, 235, 235),
-              ),
-            ),
-              contentPadding: EdgeInsets.all(16.0),
-              title: Text(
-                institution.name,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              subtitle: Text(
-                'Turno: ${institution.turno}',
-                style: TextStyle(color: Colors.grey[700], fontSize: 14),
-              ),
-              trailing: IconButton(
-                icon: Icon(Icons.delete),
-                iconSize: 35,
-                color: Colors.red,
-                onPressed: () {
-                  _showDeleteConfirmation(institution);
-                },
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => GradeGroupScreen(institution: institution),
+                  elevation: 5,
+                  margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  child: ListTile(
+                    leading: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: CircleAvatar(
+                        child: Icon(Icons.school_sharp,
+                          color: const Color.fromARGB(255, 84, 112, 179), size: 30),
+                        backgroundColor: const Color.fromARGB(255, 237, 235, 235),
+                      ),
+                    ),
+                    contentPadding: EdgeInsets.all(16.0),
+                    title: Text(
+                      institution.name,
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    subtitle: Text(
+                      'Turno: ${institution.turno}',
+                      style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete),
+                      iconSize: 35,
+                      color: Colors.red,
+                      onPressed: () {
+                        _showDeleteConfirmation(institution);
+                      },
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => GradeGroupScreen(institution: institution),
+                        ),
+                      );
+                    },
                   ),
                 );
               },
             ),
-          );
-        },
+          ),
+          Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: Text(
+              'Powered by Darío GTZ',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[600]),
+            ),
+          ),
+        ],
       ),
     );
   }
