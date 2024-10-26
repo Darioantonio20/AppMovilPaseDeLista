@@ -212,6 +212,24 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         elevation: 5,
                         margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                         child: ListTile(
+                           leading: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    spreadRadius: 2,
+                                    blurRadius: 5,
+                                    offset: Offset(0, 3), 
+                                  ),
+                                ],
+                              ),
+                              child: CircleAvatar(
+                                child: Icon(Icons.person,
+                                  color: const Color.fromARGB(255, 84, 112, 179), size: 30),
+                                  backgroundColor: const Color.fromARGB(255, 237, 235, 235),
+                              ),
+                            ),
                           contentPadding: EdgeInsets.all(16.0),
                           title: Text(
                             student.name,

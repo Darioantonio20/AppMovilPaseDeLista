@@ -106,13 +106,25 @@ class _StudentsScreenState extends State<StudentsScreen> {
           ),
           actions: [
             TextButton(
-              child: Text('Cancelar'),
+              child: Text('Cancelar',
+                style: TextStyle(fontSize: 15),
+              ),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: const Color.fromARGB(255, 177, 19, 19),
+                textStyle: TextStyle(fontWeight: FontWeight.bold),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Omitir duplicados'),
+              child: Text('Omitir duplicados',
+               style: TextStyle(fontSize: 15),
+              ),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: const Color.fromARGB(255, 84, 112, 179),
+                textStyle: TextStyle(fontWeight: FontWeight.bold),
+              ),
               onPressed: () {
                 _addStudentsWithoutDuplicates(csvStudents);
                 Navigator.of(context).pop();
@@ -218,6 +230,24 @@ class _StudentsScreenState extends State<StudentsScreen> {
                   margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                   child: ListTile(
                     contentPadding: EdgeInsets.all(16.0),
+                    leading: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(0, 3), 
+                          ),
+                        ],
+                      ),
+                      child: CircleAvatar(
+                        child: Icon(Icons.person,
+                          color: const Color.fromARGB(255, 84, 112, 179), size: 30),
+                          backgroundColor: const Color.fromARGB(255, 237, 235, 235),
+                      ),
+                    ),
                     title: Text(
                       student.name,
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),

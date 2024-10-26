@@ -118,15 +118,37 @@ class _GradeGroupScreenState extends State<GradeGroupScreen> {
                       children: [
                         TextField(
                           controller: _gradeController,
-                          decoration: InputDecoration(labelText: 'Grado'),
+                          cursorColor: const Color.fromARGB(255, 84, 112, 179),
+                          decoration: InputDecoration(
+                            labelText: 'Grado',
+                            labelStyle: TextStyle(color: const Color.fromARGB(255, 84, 112, 179)),
+                            focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: const Color.fromARGB(255, 84, 112, 179)),
+                            ),
+                          ),
                         ),
+                        SizedBox(height: 15),
                         TextField(
                           controller: _groupController,
-                          decoration: InputDecoration(labelText: 'Grupo'),
+                          cursorColor: const Color.fromARGB(255, 84, 112, 179),
+                          decoration: InputDecoration(
+                            labelText: 'Grupo',
+                            labelStyle: TextStyle(color: const Color.fromARGB(255, 84, 112, 179)),
+                            focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: const Color.fromARGB(255, 84, 112, 179)),
+                            ),
+                          ),
                         ),
+                        SizedBox(height: 15),
                         TextField(
                           controller: _subjectController,
-                          decoration: InputDecoration(labelText: 'Materia'), // Nuevo campo para materia
+                          cursorColor: const Color.fromARGB(255, 84, 112, 179),
+                          decoration: InputDecoration(labelText: 'Materia',
+                            labelStyle: TextStyle(color: const Color.fromARGB(255, 84, 112, 179)),
+                            focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: const Color.fromARGB(255, 84, 112, 179)),
+                            ),
+                          ), 
                         ),
                       ],
                     ),
@@ -173,6 +195,24 @@ class _GradeGroupScreenState extends State<GradeGroupScreen> {
             elevation: 5,
             margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
             child: ListTile(
+             leading: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(0, 3), // changes position of shadow
+                  ),
+                ],
+              ),
+              child: CircleAvatar(
+                child: Icon(Icons.groups,
+                  color: const Color.fromARGB(255, 84, 112, 179), size: 30),
+                backgroundColor: const Color.fromARGB(255, 237, 235, 235),
+              ),
+            ),
               contentPadding: EdgeInsets.all(16.0),
               title: Text(
                 '${gradeGroup.grade} - ${gradeGroup.group} - ${gradeGroup.subject}', // Mostrar materia

@@ -172,6 +172,25 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Historial de asistencia",
+            style: TextStyle(color: const Color.fromARGB(255, 8, 8, 8),
+            fontSize: 20,)
+          ),
+          centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.file_download_outlined, color: const Color.fromARGB(255, 87, 156, 115)),
+            onPressed: _shareCSV,
+            tooltip: 'Compartir CSV',
+          ),
+          IconButton(
+            icon: Icon(Icons.picture_as_pdf_outlined, color: Color.fromARGB(255, 183, 61, 86)),
+            onPressed: _sharePDF,
+            tooltip: 'Compartir PDF',
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -179,37 +198,16 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
               ? Center(child: Text('No hay registros de asistencia disponibles'))
               : Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.insert_drive_file),
-                            onPressed: _shareCSV,
-                            tooltip: 'Compartir CSV',
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.picture_as_pdf_outlined),
-                            onPressed: _sharePDF,
-                            tooltip: 'Compartir PDF',
-                          ),
-                        ],
-                      ),
-                    ),
                     Expanded(
                       child: ListView(
                         children: attendanceSummary.keys.map((studentId) {
                           List<Map<String, dynamic>> studentRecords = attendanceHistory
                               .where((record) => record['studentId'] == studentId)
                               .toList();
-
                           if (studentRecords.isEmpty) return SizedBox.shrink();
-
                           String studentName = studentRecords[0]['name'] ?? 'Sin nombre';
                           String studentMatricula =
                               studentRecords[0]['matricula'] ?? 'Sin matrícula';
-
                           return Card(
                             elevation: 5,
                             margin: const EdgeInsets.symmetric(vertical: 10),
@@ -218,10 +216,21 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    '$studentName - $studentMatricula',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold, fontSize: 18),
+                                  Row(
+                                    children: [
+                                      CircleAvatar(
+                                        backgroundColor: const Color.fromARGB(255, 237, 235, 235),
+                                        child: Icon(Icons.person, color: const Color.fromARGB(255, 84, 112, 179)),
+                                      ),
+                                      const SizedBox(width: 10), // Espacio entre el icono y el texto
+                                      Text(
+                                        '$studentName - $studentMatricula',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   const SizedBox(height: 10),
                                   Row(
