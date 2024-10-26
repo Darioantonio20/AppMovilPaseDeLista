@@ -223,12 +223,23 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                         child: Icon(Icons.person, color: const Color.fromARGB(255, 84, 112, 179)),
                                       ),
                                       const SizedBox(width: 10), // Espacio entre el icono y el texto
-                                      Text(
-                                        '$studentName - $studentMatricula',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
-                                        ),
+                                    Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            studentName,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          Text(
+                                            studentMatricula,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
