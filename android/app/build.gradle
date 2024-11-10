@@ -17,30 +17,45 @@ plugins {
 }
 
 android {
-    namespace = "com.example.pase_de_lista"
+    namespace = "com.upchiapas.pase_de_lista"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-
     kotlinOptions {
         jvmTarget = "11"
     }
-
     defaultConfig {
-        applicationId = "com.example.pase_de_lista"
+        applicationId = "com.upchiapas.pase_de_lista"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
-
-    buildTypes {
+    signingConfigs {
         release {
-            signingConfig = signingConfigs.debug
+            keyAlias 'my-key-alias'
+            keyPassword 'Naruto13'
+            storeFile file('/Users/darioantoniogutierrezalvarez/my-release-key.jks')
+            storePassword 'Naruto13'
+        }
+    }
+    buildTypes {
+        debug {
+            ndk {
+                debugSymbolLevel 'FULL'
+            }
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+              ndk {
+                debugSymbolLevel 'SYMBOL_TABLE'
+            }
         }
     }
 }

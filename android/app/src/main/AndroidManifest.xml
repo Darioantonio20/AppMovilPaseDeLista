@@ -1,9 +1,10 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.pase_de_lista">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.upchiapas.pase_de_lista">
     <!-- Permisos requeridos -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28"/>
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
 
     <!-- Declarar que la cámara no es obligatoria en dispositivos sin hardware de cámara -->
     <uses-feature android:name="android.hardware.camera" android:required="false"/>

@@ -1,8 +1,8 @@
 name: pase_de_lista
-description: "A new Flutter project."
+description: Una aplicación para pasar lista.
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.1+1
 
 environment:
   sdk: ^3.5.3
@@ -21,7 +21,6 @@ dependencies:
   permission_handler: ^10.0.0
   #external_path: ^1.0.2
   share_plus: ^10.1.1 
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
